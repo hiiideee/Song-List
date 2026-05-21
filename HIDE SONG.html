@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)file:///C:/Users/Owner/Downloads/index_2.html -->
+<html lang="zh"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的歌单</title>
+<link rel="stylesheet" href="./HIDE SONG_files/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f5f5f4;
+    --text: #1a1a18;
+    --text-secondary: #6b6b67;
+    --text-tertiary: #a0a09c;
+    --border: rgba(0,0,0,0.12);
+    --border-md: rgba(0,0,0,0.22);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg-secondary: #252523;
+      --text: #f0f0ec;
+      --text-secondary: #9a9a96;
+      --text-tertiary: #606060;
+      --border: rgba(255,255,255,0.10);
+      --border-md: rgba(255,255,255,0.20);
+    }
+  }
+
+  body {
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .page { padding: 2.5rem 1.5rem; max-width: 720px; margin: 0 auto; }
+
+  .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; gap: 12px; }
+  .title { font-size: 22px; font-weight: 500; letter-spacing: -0.3px; }
+  .subtitle { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+
+  .mode-badge {
+    font-size: 12px; padding: 5px 12px; border-radius: 20px;
+    border: 0.5px solid var(--border-md); color: var(--text-secondary);
+    cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px;
+    background: transparent; transition: background .15s; flex-shrink: 0;
+  }
+  .mode-badge:hover { background: var(--bg-secondary); }
+  .mode-badge.edit-mode { border-color: var(--text-secondary); color: var(--text); }
+
+  .controls { display: flex; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .controls input, .controls select {
+    font-size: 14px; height: 36px; padding: 0 12px;
+    border: 0.5px solid var(--border-md); border-radius: var(--radius);
+    background: var(--bg); color: var(--text); outline: none; transition: border-color .15s;
+  }
+  .controls input { flex: 1; min-width: 160px; }
+  .controls input:focus, .controls select:focus { border-color: var(--text-secondary); }
+  .controls select { min-width: 120px; cursor: pointer; }
+
+  .btn {
+    height: 36px; padding: 0 14px; border: 0.5px solid var(--border-md);
+    border-radius: var(--radius); background: transparent; color: var(--text);
+    font-size: 14px; cursor: pointer; display: flex; align-items: center;
+    gap: 6px; white-space: nowrap; transition: background .15s;
+    font-family: inherit;
+  }
+  .btn:hover { background: var(--bg-secondary); }
+  .btn.primary { border-color: var(--text-secondary); font-weight: 500; }
+
+  .stats { margin-bottom: 1.5rem; font-size: 13px; color: var(--text-secondary); }
+  .stats strong { color: var(--text); font-weight: 500; }
+
+  .list { display: flex; flex-direction: column; }
+  .song-row { padding: 10px 4px; border-bottom: 0.5px solid var(--border); border-radius: 4px; transition: background .1s; }
+  .song-row:hover { background: var(--bg-secondary); }
+  .song-main { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 12px; }
+  .song-idx { font-size: 13px; color: var(--text-tertiary); text-align: center; }
+  .song-info { overflow: hidden; }
+  .song-title { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .song-artist { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .song-comment { font-size: 12px; color: var(--text-secondary); margin-top: 5px; padding-left: 40px; font-style: italic; line-height: 1.5; }
+  .song-actions { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+
+  .icon-btn {
+    background: none; border: none; cursor: pointer; padding: 4px 5px;
+    color: var(--text-tertiary); transition: color .15s; line-height: 1;
+    font-size: 16px; border-radius: var(--radius);
+  }
+  .icon-btn:hover { color: var(--text); background: var(--bg-secondary); }
+
+  .status-pill {
+    font-size: 11px; padding: 2px 9px; border-radius: 20px; border: 0.5px solid;
+    white-space: nowrap; cursor: pointer; background: transparent; font-family: inherit; transition: all .15s;
+  }
+  .status-pill.can { border-color: #0f6e56; color: #0f6e56; }
+  .status-pill.practicing { border-color: #854f0b; color: #854f0b; }
+  .status-pill.none { border-color: var(--border); color: var(--text-tertiary); }
+
+  .empty { text-align: center; padding: 3rem 0; color: var(--text-secondary); font-size: 14px; }
+
+  .section-label {
+    font-size: 11px; font-weight: 500; color: var(--text-tertiary);
+    padding: 10px 4px 4px; letter-spacing: .06em; text-transform: uppercase;
+    border-bottom: 0.5px solid var(--border); margin-top: 8px;
+  }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,.4);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--bg); border: 0.5px solid var(--border-md);
+    border-radius: var(--radius-lg); padding: 1.5rem; width: 420px; max-width: 90vw;
+  }
+  .modal h3 { font-size: 16px; font-weight: 500; margin-bottom: 1rem; }
+  .field { margin-bottom: 12px; }
+  .field label { font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+  .field input, .field textarea {
+    width: 100%; padding: 8px 12px; border: 0.5px solid var(--border-md);
+    border-radius: var(--radius); background: var(--bg); color: var(--text);
+    font-size: 14px; outline: none; font-family: inherit;
+  }
+  .field input { height: 36px; }
+  .field textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+  .field input:focus, .field textarea:focus { border-color: var(--text-secondary); }
+
+  .status-select { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+  .status-opt {
+    padding: 5px 12px; border-radius: 20px; border: 0.5px solid var(--border-md);
+    font-size: 12px; cursor: pointer; background: transparent; color: var(--text-secondary);
+    font-family: inherit; transition: all .15s;
+  }
+  .status-opt.sel-none { border-color: var(--text-secondary); color: var(--text); }
+  .status-opt.sel-can { border-color: #0f6e56; color: #0f6e56; background: rgba(15,110,86,.07); }
+  .status-opt.sel-practicing { border-color: #854f0b; color: #854f0b; background: rgba(133,79,11,.07); }
+
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1rem; }
+  .error-msg { font-size: 12px; color: #a32d2d; margin-top: 6px; display: none; }
+  .error-msg.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="header">
+    <div>
+      <div class="title">我的歌单 <i class="ti ti-music" aria-hidden="true" style="font-size:18px;opacity:.4"></i></div>
+      <div class="subtitle">私人收藏</div>
+    </div>
+    <button class="mode-badge" id="modeBadge" onclick="toggleMode()">
+      <i class="ti ti-lock" aria-hidden="true"></i>
+      <span id="modeLabel">查看模式</span>
+    </button>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="搜索歌名、歌手…" oninput="render()">
+    <select id="filterBy" onchange="render()">
+      <option value="">全部</option>
+      <option value="artist">按歌手</option>
+      <option value="can">可以唱</option>
+      <option value="practicing">练习中</option>
+    </select>
+    <button class="btn primary" id="addBtn" onclick="openAdd()" style="display:none">
+      <i class="ti ti-plus" aria-hidden="true"></i> 添加歌曲
+    </button>
+  </div>
+
+  <div class="stats" id="stats"><strong>0</strong> 首 · 可以唱 <strong>0</strong> · 练习中 <strong>0</strong></div>
+  <div class="list" id="list"><div class="empty">没有找到歌曲</div></div>
+</div>
+
+<!-- 密码弹窗 -->
+<div class="modal-bg" id="pwModal">
+  <div class="modal">
+    <h3>进入编辑模式</h3>
+    <div class="field">
+      <label>请输入密码</label>
+      <input type="password" id="pwInput" placeholder="密码" onkeydown="if(event.key===&#39;Enter&#39;)confirmPw()">
+      <div class="error-msg" id="pwError">密码错误，请重试</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closePwModal()">取消</button>
+      <button class="btn primary" onclick="confirmPw()">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- 添加/编辑弹窗 -->
+<div class="modal-bg" id="addModal">
+  <div class="modal">
+    <h3 id="modalTitle">添加歌曲</h3>
+    <div class="field"><label>歌曲名称 *</label><input id="fTitle" placeholder="例：青花瓷"></div>
+    <div class="field"><label>歌手 *</label><input id="fArtist" placeholder="例：周杰伦"></div>
+    <div class="field">
+      <label>演唱状态</label>
+      <div class="status-select">
+        <button class="status-opt" id="optNone" onclick="selectStatus(&#39;&#39;)">—</button>
+        <button class="status-opt" id="optCan" onclick="selectStatus(&#39;can&#39;)">可以唱</button>
+        <button class="status-opt" id="optPracticing" onclick="selectStatus(&#39;practicing&#39;)">练习中</button>
+      </div>
+    </div>
+    <div class="field"><label>备注</label><textarea id="fComment" placeholder="随便写点什么…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn primary" onclick="saveEntry()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ⚙️ 修改这里的密码
+  const PASSWORD = 'music123';
+
+  let isEditMode = false;
+  let editId = null;
+  let selectedStatus = '';
+
+  let songs = JSON.parse(localStorage.getItem('my_playlist') || 'null') || [];
+  let nextId = songs.length ? Math.max(...songs.map(s => s.id)) + 1 : 1;
+
+  function save() { localStorage.setItem('my_playlist', JSON.stringify(songs)); }
+
+  function selectStatus(v) {
+    selectedStatus = v;
+    document.getElementById('optNone').className = 'status-opt' + (v === '' ? ' sel-none' : '');
+    document.getElementById('optCan').className = 'status-opt' + (v === 'can' ? ' sel-can' : '');
+    document.getElementById('optPracticing').className = 'status-opt' + (v === 'practicing' ? ' sel-practicing' : '');
+  }
+
+  function toggleMode() {
+    if (isEditMode) { isEditMode = false; updateModeUI(); return; }
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwError').classList.remove('show');
+    document.getElementById('pwModal').classList.add('open');
+    setTimeout(() => document.getElementById('pwInput').focus(), 100);
+  }
+  function confirmPw() {
+    if (document.getElementById('pwInput').value === PASSWORD) {
+      isEditMode = true; closePwModal(); updateModeUI();
+    } else {
+      document.getElementById('pwError').classList.add('show');
+      document.getElementById('pwInput').value = '';
+      document.getElementById('pwInput').focus();
+    }
+  }
+  function closePwModal() { document.getElementById('pwModal').classList.remove('open'); }
+
+  function updateModeUI() {
+    const badge = document.getElementById('modeBadge');
+    if (isEditMode) {
+      badge.classList.add('edit-mode');
+      document.getElementById('modeLabel').textContent = '编辑模式';
+      badge.querySelector('i').className = 'ti ti-lock-open';
+      document.getElementById('addBtn').style.display = 'flex';
+    } else {
+      badge.classList.remove('edit-mode');
+      document.getElementById('modeLabel').textContent = '查看模式';
+      badge.querySelector('i').className = 'ti ti-lock';
+      document.getElementById('addBtn').style.display = 'none';
+    }
+    render();
+  }
+
+  function filtered() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const f = document.getElementById('filterBy').value;
+    return songs.filter(s => {
+      const match = !q || s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q);
+      if (!match) return false;
+      if (f === 'can') return s.status === 'can';
+      if (f === 'practicing') return s.status === 'practicing';
+      return true;
+    });
+  }
+
+  function cycleStatus(id) {
+    const s = songs.find(x => x.id === id);
+    if (!s) return;
+    const cycle = { '': 'practicing', 'practicing': 'can', 'can': '' };
+    s.status = cycle[s.status || ''];
+    save(); render();
+  }
+
+  function pillHTML(s) {
+    if (s.status === 'can') return `<button class="status-pill can" data-id="${s.id}" title="点击切换状态">可以唱</button>`;
+    if (s.status === 'practicing') return `<button class="status-pill practicing" data-id="${s.id}" title="点击切换状态">练习中</button>`;
+    return `<button class="status-pill none" data-id="${s.id}" title="点击设置状态"><i class="ti ti-music-off" aria-hidden="true" style="font-size:13px"></i></button>`;
+  }
+
+  function rowHTML(s, idx) {
+    const editBtns = isEditMode ? `
+      <button class="icon-btn edit-btn" data-id="${s.id}" title="编辑"><i class="ti ti-edit" aria-hidden="true"></i></button>
+      <button class="icon-btn del-btn" data-id="${s.id}" title="删除" style="color:#a32d2d"><i class="ti ti-trash" aria-hidden="true"></i></button>` : '';
+    return `<div class="song-row">
+      <div class="song-main">
+        <span class="song-idx">${idx}</span>
+        <div class="song-info">
+          <div class="song-title">${s.title}</div>
+          <div class="song-artist">${s.artist}</div>
+        </div>
+        <div class="song-actions">
+          ${pillHTML(s)}
+          ${editBtns}
+        </div>
+      </div>
+      ${s.comment ? `<div class="song-comment"><i class="ti ti-message-circle" aria-hidden="true" style="font-size:12px;margin-right:4px;opacity:.6"></i>${s.comment}</div>` : ''}
+    </div>`;
+  }
+
+  function render() {
+    const f = document.getElementById('filterBy').value;
+    const list = filtered();
+    const listEl = document.getElementById('list');
+    const can = songs.filter(s => s.status === 'can').length;
+    const prac = songs.filter(s => s.status === 'practicing').length;
+    document.getElementById('stats').innerHTML =
+      `<strong>${songs.length}</strong> 首 · 可以唱 <strong>${can}</strong> · 练习中 <strong>${prac}</strong>`;
+
+    if (!list.length) { listEl.innerHTML = '<div class="empty">没有找到歌曲</div>'; return; }
+
+    let html = '';
+    if (f === 'artist') {
+      const map = {};
+      list.forEach(s => { const k = s.artist || '未知'; if (!map[k]) map[k] = []; map[k].push(s); });
+      Object.entries(map).forEach(([label, group]) => {
+        html += `<div class="section-label">${label}</div>`;
+        group.forEach((s, i) => html += rowHTML(s, i + 1));
+      });
+    } else {
+      list.forEach((s, i) => html += rowHTML(s, i + 1));
+    }
+    listEl.innerHTML = html;
+
+    listEl.querySelectorAll('.status-pill').forEach(b => b.onclick = () => cycleStatus(+b.dataset.id));
+    if (isEditMode) {
+      listEl.querySelectorAll('.edit-btn').forEach(b => b.onclick = () => openEdit(+b.dataset.id));
+      listEl.querySelectorAll('.del-btn').forEach(b => b.onclick = () => deleteSong(+b.dataset.id));
+    }
+  }
+
+  function openAdd() {
+    editId = null; selectedStatus = ''; selectStatus('');
+    document.getElementById('modalTitle').textContent = '添加歌曲';
+    ['fTitle', 'fArtist', 'fComment'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('addModal').classList.add('open');
+  }
+  function openEdit(id) {
+    const s = songs.find(x => x.id === id); if (!s) return;
+    editId = id; selectedStatus = s.status || '';
+    document.getElementById('modalTitle').textContent = '编辑歌曲';
+    document.getElementById('fTitle').value = s.title;
+    document.getElementById('fArtist').value = s.artist;
+    document.getElementById('fComment').value = s.comment || '';
+    selectStatus(selectedStatus);
+    document.getElementById('addModal').classList.add('open');
+  }
+  function closeModal() { document.getElementById('addModal').classList.remove('open'); }
+  function deleteSong(id) {
+    if (!confirm('确定删除这首歌？')) return;
+    songs = songs.filter(s => s.id !== id); save(); render();
+  }
+  function saveEntry() {
+    const title = document.getElementById('fTitle').value.trim();
+    const artist = document.getElementById('fArtist').value.trim();
+    if (!title || !artist) { alert('歌曲名称和歌手为必填项'); return; }
+    const comment = document.getElementById('fComment').value.trim();
+    if (editId != null) {
+      const s = songs.find(x => x.id === editId);
+      if (s) { s.title = title; s.artist = artist; s.comment = comment; s.status = selectedStatus; }
+    } else {
+      songs.push({ id: nextId++, title, artist, comment, status: selectedStatus });
+    }
+    save(); closeModal(); render();
+  }
+
+  document.getElementById('addModal').addEventListener('click', e => { if (e.target === document.getElementById('addModal')) closeModal(); });
+  document.getElementById('pwModal').addEventListener('click', e => { if (e.target === document.getElementById('pwModal')) closePwModal(); });
+
+  render();
+</script>
+
+
+</body></html>
